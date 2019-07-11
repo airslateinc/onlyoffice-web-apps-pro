@@ -167,7 +167,7 @@ define([
 
             this.menuFile = new DE.Views.FileMenu();
             this.menuFile.render();
-            this.btnAbout.panel = (new Common.Views.About({el: $('#about-menu-panel'), appName: 'Document Editor'})).render();
+            this.btnAbout.panel = (new Common.Views.About({el: $('#about-menu-panel'), appName: 'Редактор документов'})).render();
 
             return this;
         },
