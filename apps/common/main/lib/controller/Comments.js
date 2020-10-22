@@ -387,7 +387,7 @@ define([
                     }
 
                     t.api.asc_changeComment(id, ascComment);
-
+                    t.mode && t.mode.canRequestUsers && t.view.pickEMail(ascComment.asc_getGuid(), commentVal);
                     return true;
                 }
             }
@@ -831,7 +831,7 @@ define([
         onApiShowComment: function (uids, posX, posY, leftX, opts, hint) {
             var apihint = hint;
             var same_uids = (0 === _.difference(this.uids, uids).length) && (0 === _.difference(uids, this.uids).length);
-            
+
             if (hint && this.isSelectedComment && same_uids && !this.isModeChanged) {
                 // хотим показать тот же коментарий что был и выбран
                 return;

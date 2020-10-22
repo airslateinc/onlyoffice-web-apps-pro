@@ -3586,7 +3586,7 @@ tbody.collapse.in {
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
 .open > .dropdown-menu {
-  display: block;
+  display: block !important;
 }
 .open > a {
   outline: 0;

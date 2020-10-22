@@ -102,7 +102,9 @@ define([
             toggleGroup : null,
             iconCls     : '',
             menu        : null,
-            canFocused  : true
+            canFocused  : true,
+            className   : '',
+            picture     : '',
         },
 
         tagName : 'li',
@@ -135,6 +137,8 @@ define([
             this.template       = me.options.template || this.template;
             this.iconCls        = me.options.iconCls;
             this.hint           = me.options.hint;
+            this.className      = me.options.className;
+            this.picture        = me.options.picture;
             this.rendered       = false;
 
             if (this.menu !== null && !(this.menu instanceof Common.UI.Menu) && !(this.menu instanceof Common.UI.MenuSimple)) {

@@ -27,13 +27,17 @@
   outline: 0;
 }
 
+.open>.dropdown-menu {
+  display: block !important;
+}
+
 // The dropdown menu (ul)
 .dropdown-menu {
   position: absolute;
   top: 100%;
   left: 0;
   z-index: @zindex-dropdown;
-  display: none; // none by default, but block on "open" of the menu
+  display: none !important; // none by default, but block on "open" of the menu
   float: left;
   min-width: 160px;
   padding: 5px 0;

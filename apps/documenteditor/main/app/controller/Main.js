@@ -1800,7 +1800,6 @@ define([
 
             onServerVersion: function(buildVersion) {
                 if (this.changeServerVersion) return true;
-
                 if (DocsAPI.DocEditor.version() !== buildVersion && !window.compareVersions) {
                     this.changeServerVersion = true;
                     Common.UI.warning({

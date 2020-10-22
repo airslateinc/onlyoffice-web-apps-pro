@@ -712,10 +712,7 @@ define([
         },
 
         pickEMail: function (commentId, message) {
-            var arr = Common.Utils.String.htmlEncode(message).match(/\B[@+][A-Z0-9._%+-]+@[A-Z0-9._]+\.[A-Z]+\b/gi);
-            arr = _.map(arr, function(str){
-                return str.slice(1, str.length);
-            });
+            var arr = Common.Utils.String.htmlEncode(message).match(/([A-Z0-9._+-]+@[A-Z0-9._-]+\.[A-Z0-9._-]+)/gi) || [];
             (arr.length>0) && Common.Gateway.requestSendNotify({
                 emails: arr,
                 actionId: commentId, // comment id

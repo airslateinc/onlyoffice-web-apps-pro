@@ -103,7 +103,7 @@ define([
             this.canRequestUsers = options.canRequestUsers;
             this.canRequestSendNotify = options.canRequestSendNotify;
             this.mentionShare = options.mentionShare;
-            this.externalUsers = [];
+            this.requestUsers = _.debounce(this.onEmailListMenu, 500);
             this._state = {commentsVisible: false, reviewVisible: false};
 
             _options.tpl = _.template(this.template)(_options);
@@ -394,7 +394,6 @@ define([
                                 readdresolves();
 
                             } else if (btn.hasClass('btn-inner-edit', false)) {
-
                                 if (record.get('dummy')) {
                                     var commentVal = this.getActiveTextBoxVal();
                                     me.clearDummyText();
@@ -411,7 +410,6 @@ define([
                                 }
 
                                 this.clearTextBoxBind();
-
                                 if (!_.isUndefined(this.replyId)) {
                                     me.fireEvent('comment:changeReply', [commentId, this.replyId, this.getActiveTextBoxVal()]);
                                     this.replyId = undefined;
@@ -472,7 +470,8 @@ define([
                     this.emailMenu = new Common.UI.Menu({
                         maxHeight: 200,
                         cyclic: false,
-                        items: []
+                        items: [],
+                        cls: 'mentions-list'
                     }).on('render:after', function(mnu) {
                         this.scroller = new Common.UI.Scroller({
                             el: $(this.el).find('.dropdown-menu '),
@@ -910,9 +909,17 @@ define([
 
             return undefined;
         },
+        deleteLastAtSign: function (currentValue) {
+            var lastAtIndex = currentValue.lastIndexOf('@');
+            var isLastAtSign = lastAtIndex === currentValue.length - 1;
+            if (isLastAtSign) {
+                return currentValue.substring(0, currentValue.length - 1);
+            }
+            return currentValue;
+        },
         saveDummyText: function () {
             if (this.commentsView && this.commentsView.cmpEl.find('.lock-area').length < 1) {
-                this.textDummyVal = this.commentsView.getActiveTextBoxVal();
+                this.textDummyVal = this.deleteLastAtSign(this.commentsView.getActiveTextBoxVal());
             }
         },
         clearDummyText: function () {
@@ -959,7 +966,7 @@ define([
                         event.keyCode == Common.UI.Keys.HOME || event.keyCode == Common.UI.Keys.END || event.keyCode == Common.UI.Keys.RIGHT ||
                         event.keyCode == Common.UI.Keys.LEFT || event.keyCode == Common.UI.Keys.UP) {
                         // hide email menu
-                        me.onEmailListMenu();
+                        // me.onEmailListMenu();
                     } else if (event.keyCode == Common.UI.Keys.DOWN) {
                         if (me.emailMenu && me.emailMenu.rendered && me.emailMenu.isVisible()) {
                             _.delay(function () {
@@ -988,12 +995,16 @@ define([
                         }
                     }
                     var str = val.substring(left, right+1),
-                        res = str.match(/^(?:[@]|[+](?!1))(\S*)/);
+                        res = str.match(/^(?:[@](?!1))(\S*)/);
+                        console.log('Result: ', res);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
-                        me.onEmailListMenu(str, left, right);
-                    } else
-                        me.onEmailListMenu(); // hide email menu
+                        me.requestUsers(str);
+                        me.left = left;
+                        me.right = right;
+                    } else if (me.emailMenu.isVisible()) {
+                        me.emailMenu.hide();
+                    }
                 });
             }
         },
@@ -1036,14 +1047,26 @@ define([
         },
 
         setUsers: function(data) {
-            this.externalUsers = data.users || [];
+            var users;
+            if (data && data.users && data.users.length > 0) {
+                users = data.users;
+            } else {
+                users = [{ empty: true }]
+            }
             this.isUsersLoading = false;
-            this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
-            this._state.emailSearch = null;
+            this.renderContacts(users);
+        },
+
+        toggleLoader: function(value) {
+            if (value) {
+                this.renderContacts([{ loader: true }]);
+            } else {
+                this.clearUsers();
+            }
         },
 
         clearUsers: function() {
-            this.externalUsers = [];
+            this.renderContacts([]);
         },
 
         getPopover: function(options) {
@@ -1070,29 +1093,23 @@ define([
             }
         },
 
-        onEmailListMenu: function(str, left, right, show) {
-            var me   = this,
-                users = me.externalUsers,
+        onEmailListMenu: function(str) {
+            console.log('onEmailListMenu: ', str);
+            Common.Gateway.requestUsers(str);
+            this.toggleLoader(true);
+        },
+
+        renderContacts: function(users) {
+            console.log('renderContacts: ', users);
+            var me = this,
                 menu = me.emailMenu;
 
-            if (users.length<1) {
-                this._state.emailSearch = {
-                    str: str,
-                    left: left,
-                    right: right
-                };
-
-                if (this.isUsersLoading) return;
-
-                this.isUsersLoading = true;
-                Common.Gateway.requestUsers();
-                return;
-            }
-            if (typeof str == 'string') {
+            if (users.length > 0) {
                 var menuContainer = me.$window.find(Common.Utils.String.format('#menu-container-{0}', menu.id)),
                     textbox = this.commentsView.getTextBox(),
                     textboxDom = textbox ? textbox[0] : null,
                     showPoint = textboxDom ? [textboxDom.offsetLeft, textboxDom.offsetTop + textboxDom.clientHeight + 3] : [0, 0];
+                    console.log(textboxDom, showPoint);
 
                 if (!menu.rendered) {
                     // Prepare menu container
@@ -1117,38 +1134,61 @@ define([
                     i--;
                 }
 
-                if (users.length>0) {
-                    str = str.toLowerCase();
-                    if (str.length>0) {
-                        users = _.filter(users, function(item) {
-                            return (item.email && 0 === item.email.toLowerCase().indexOf(str) || item.name && 0 === item.name.toLowerCase().indexOf(str))
-                        });
-                    }
-                    var tpl = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;">' +
-                                            '<div style="overflow: hidden; text-overflow: ellipsis; max-width: 195px;"><%= Common.Utils.String.htmlEncode(caption) %></div>' +
-                                            '<div style="overflow: hidden; text-overflow: ellipsis; max-width: 195px; color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div>' +
-                                        '</a>'),
-                        divider = false;
-                    _.each(users, function(menuItem, index) {
-                        if (divider && !menuItem.hasAccess) {
-                            divider = false;
-                            menu.addItem(new Common.UI.MenuItem({caption: '--'}));
-                        }
+                var tpl = _.template('\
+                    <div class="mentions-list__item-thumb" id="<%= id %>">\
+                        <div class="fl-thumb fl-thumb--circle fl-thumb--sm">\
+                            <img src="<%= Common.Utils.String.htmlEncode(options.picture) %>" class="fl-thumb__image">\
+                        </div>\
+                    </div>\
+                    <div class="mentions-list__item-info">\
+                        <span class="mentions-list__item-username">\
+                            <%= Common.Utils.String.htmlEncode(caption) %>\
+                        </span>\
+                        <span class="mentions-list__item-email">\
+                            (<%= Common.Utils.String.htmlEncode(options.value) %>)\
+                        </span>\
+                    </div>\
+                ');
+                var loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
+                    divider = false;
 
-                        if (menuItem.email && menuItem.name) {
-                            var mnu = new Common.UI.MenuItem({
-                                caption     : menuItem.name,
-                                value       : menuItem.email,
-                                template    : tpl
-                            }).on('click', function(item, e) {
-                                me.insertEmailToTextbox(item.options.value, left, right);
-                            });
-                            menu.addItem(mnu);
-                            if (menuItem.hasAccess)
-                                divider = true;
-                        }
-                    });
-                }
+                _.each(users, function(menuItem) {
+                    if (divider && !menuItem.hasAccess) {
+                        divider = false;
+                        menu.addItem(new Common.UI.MenuItem({caption: '--'}));
+                    }
+
+                    if (menuItem.loader) {
+                        var mnu = new Common.UI.MenuItem({
+                            value     : 'Loading...',
+                            template  : loader
+                        });
+                        menu.addItem(mnu);
+                    }
+
+                    if (menuItem.empty) {
+                        var mnu = new Common.UI.MenuItem({
+                            value     : 'No contacts yet',
+                            template  : loader
+                        });
+                        menu.addItem(mnu);
+                    }
+
+                    if (menuItem.email && menuItem.name) {
+                        var mnu = new Common.UI.MenuItem({
+                            caption     : menuItem.name,
+                            value       : menuItem.email,
+                            picture     : menuItem.picture,
+                            template    : tpl,
+                            className   : 'mentions-list__item'
+                        }).on('click', function(item, e) {
+                            me.insertEmailToTextbox(item.options.value, me.left, me.right);
+                        });
+                        menu.addItem(mnu);
+                        if (menuItem.hasAccess)
+                            divider = true;
+                    }
+                });
 
                 if (menu.items.length>0) {
                     menuContainer.css({left: showPoint[0], top : showPoint[1]});
@@ -1158,8 +1198,10 @@ define([
                     menu.alignPosition('bl-tl', -5);
                     menu.scroller.update({alwaysVisibleY: true});
                 } else {
-                    menu.rendered && menu.cmpEl.css('display', 'none');
+                    console.log('No matches');
+                    menu.rendered && menu.hide();
                 }
+
             } else {
                 menu.rendered && menu.cmpEl.css('display', 'none');
             }
@@ -1170,7 +1212,7 @@ define([
             if (!textBox) return;
 
             var val = textBox.val();
-            textBox.val(val.substring(0, left) + '+' + str + ' ' + val.substring(right+1, val.length));
+            textBox.val(val.substring(0, left) + str + ' ' + val.substring(right+1, val.length));
             setTimeout(function(){
                 textBox[0].selectionStart = textBox[0].selectionEnd = left + str.length + 2;
             }, 10);
@@ -1185,7 +1227,7 @@ define([
         textResolve             : 'Resolve',
         textOpenAgain           : "Open Again",
         textFollowMove          : 'Follow Move',
-        textMention             : '+mention will provide access to the document and send an email',
+        textMention             : 'Comment or add with @',
         textMentionNotify       : '+mention will notify the user via email'
     }, Common.Views.ReviewPopover || {}))
 });

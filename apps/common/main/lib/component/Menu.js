@@ -150,11 +150,12 @@ define([
                 offset      : [0, 0],
                 cyclic      : true,
                 search      : false,
-                scrollAlwaysVisible: true
+                scrollAlwaysVisible: true,
+                dropdownMenuCls: 'dropdown-menu'
             },
 
             template: _.template([
-                '<ul class="dropdown-menu <%= options.cls %>" oo_editor_input="true" style="<%= options.style %>" role="menu"></ul>'
+                '<ul class="<%= options.dropdownMenuCls %> <%= options.cls %>" oo_editor_input="true" style="<%= options.style %>" role="menu"></ul>'
             ].join('')),
 
             initialize : function(options) {
