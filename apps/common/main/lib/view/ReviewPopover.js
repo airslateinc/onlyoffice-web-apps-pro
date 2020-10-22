@@ -393,8 +393,9 @@ define([
                                 readdresolves();
 
                             } else if (btn.hasClass('btn-inner-edit', false)) {
-
+                                console.log('Add or Edit clicked !');
                                 if (record.get('dummy')) {
+                                    console.log('Dummy');
                                     var commentVal = this.getActiveTextBoxVal();
                                     me.clearDummyText();
                                     if (commentVal.length > 0)
@@ -410,12 +411,13 @@ define([
                                 }
 
                                 this.clearTextBoxBind();
-
                                 if (!_.isUndefined(this.replyId)) {
+                                    console.log('comment:changeReply');
                                     me.fireEvent('comment:changeReply', [commentId, this.replyId, this.getActiveTextBoxVal()]);
                                     this.replyId = undefined;
                                     me.fireEvent('comment:closeEditing');
                                 } else if (showEditBox) {
+                                    console.log('comment:change');
                                     me.fireEvent('comment:change', [commentId, this.getActiveTextBoxVal()]);
                                     me.fireEvent('comment:closeEditing');
                                     me.calculateSizeOfContent();
@@ -958,7 +960,7 @@ define([
                         event.keyCode == Common.UI.Keys.HOME || event.keyCode == Common.UI.Keys.END || event.keyCode == Common.UI.Keys.RIGHT ||
                         event.keyCode == Common.UI.Keys.LEFT || event.keyCode == Common.UI.Keys.UP) {
                         // hide email menu
-                        me.onEmailListMenu();
+                        // me.onEmailListMenu();
                     } else if (event.keyCode == Common.UI.Keys.DOWN) {
                         if (me.emailMenu && me.emailMenu.rendered && me.emailMenu.isVisible())
                             _.delay(function() {
@@ -984,10 +986,12 @@ define([
                             right = i-1; break;
                         }
                     }
+                    console.log('Input value: ', val);
                     var str = val.substring(left, right+1),
-                        res = str.match(/^(?:[@]|[+](?!1))(\S*)/);
+                        res = str.match(/^(?:[@](?!1))(\S*)/);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
+                        console.log('show email menu: ', str);
                         me.onEmailListMenu(str, left, right);
                     }
                 });
@@ -1036,6 +1040,16 @@ define([
             this._state.emailSearch = null;
         },
 
+        toggleLoader: function(value) {
+            if (value) {
+                this.externalUsers = [{ loader: true }]
+            } else {
+                this.clearUsers();
+            }
+            console.log('toggleLoader: ', this._state.emailSearch);
+            this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
+        },
+
         clearUsers: function() {
             this.externalUsers = [];
         },
@@ -1068,7 +1082,7 @@ define([
             var me   = this,
                 users = me.externalUsers,
                 menu = me.emailMenu;
-
+            console.log('onEmailListMenu: ', users, 'str: ', str, 'type: ', typeof str);
             if (users.length<1) {
                 this._state.emailSearch = {
                     str: str,
@@ -1080,6 +1094,8 @@ define([
 
                 this.isUsersLoading = true;
                 Common.Gateway.requestUsers();
+                console.log('Before toggle loader: ', this._state.emailSearch);
+                this.toggleLoader(true);
                 return;
             }
             if (typeof str == 'string') {
@@ -1119,11 +1135,20 @@ define([
                         });
                     }
                     var tpl = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
+                        loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
                         divider = false;
                     _.each(users, function(menuItem, index) {
                         if (divider && !menuItem.hasAccess) {
                             divider = false;
                             menu.addItem(new Common.UI.MenuItem({caption: '--'}));
+                        }
+
+                        if (menuItem.loader) {
+                            var mnu = new Common.UI.MenuItem({
+                                value     : 'Loading...',
+                                template    : loader
+                            });
+                            menu.addItem(mnu);
                         }
 
                         if (menuItem.email && menuItem.name) {
@@ -1159,7 +1184,7 @@ define([
         insertEmailToTextbox: function(str, left, right) {
             var textBox = this.commentsView.getTextBox(),
                 val = textBox.val();
-            textBox.val(val.substring(0, left) + '+' + str + val.substring(right+1, val.length));
+            textBox.val(val.substring(0, left) + str + val.substring(right+1, val.length));
             setTimeout(function(){
                 textBox[0].selectionStart = textBox[0].selectionEnd = left + str.length + 1;
             }, 10);
@@ -1174,6 +1199,6 @@ define([
         textResolve             : 'Resolve',
         textOpenAgain           : "Open Again",
         textFollowMove          : 'Follow Move',
-        textMention             : '+mention will provide access to the document and send an email'
+        textMention             : '@mention will provide access to the document and send an email'
     }, Common.Views.ReviewPopover || {}))
 });

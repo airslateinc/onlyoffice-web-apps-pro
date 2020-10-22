@@ -379,7 +379,8 @@ define([
                     }
 
                     t.api.asc_changeComment(id, ascComment);
-
+                    console.log('Comment changed, new value: ', commentVal);
+                    t.mode && t.mode.canRequestUsers && t.view.pickEMail(ascComment.asc_getGuid(), commentVal);
                     return true;
                 }
             }
@@ -1354,11 +1355,13 @@ define([
 
                     this.api.asc_addComment(comment);
                     this.view.showEditContainer(false);
+                    console.log('Mode: ', this.mode);
                     this.mode && this.mode.canRequestUsers && this.view.pickEMail(comment.asc_getGuid(), commentVal);
                     if (!_.isUndefined(this.api.asc_SetDocumentPlaceChangedEnabled)) {
                         this.api.asc_SetDocumentPlaceChangedEnabled(false);
                     }
                 }
+                console.log('New comment created, value: ', commentVal);
             }
         },
         clearDummyComment: function (clear) {
