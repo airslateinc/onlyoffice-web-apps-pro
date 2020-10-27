@@ -1155,7 +1155,8 @@ define([
                             var mnu = new Common.UI.MenuItem({
                                 caption     : menuItem.name,
                                 value       : menuItem.email,
-                                template    : tpl
+                                template    : tpl,
+                                className   : 'Hello'
                             }).on('click', function(item, e) {
                                 me.insertEmailToTextbox(item.options.value, left, right);
                             });

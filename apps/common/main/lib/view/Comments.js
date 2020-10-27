@@ -701,7 +701,7 @@ define([
         },
 
         pickEMail: function (commentId, message) {
-            var arr = Common.Utils.String.htmlEncode(message).match(/([A-Z0-9._+-]+@[A-Z0-9._-]+\.[A-Z0-9._-]+)/gi);
+            var arr = Common.Utils.String.htmlEncode(message).match(/([A-Z0-9._+-]+@[A-Z0-9._-]+\.[A-Z0-9._-]+)/gi) || [];
             console.log('pickEmail: ', 'message: ', message, 'emails: ', arr);
             (arr.length>0) && Common.Gateway.requestSendNotify({
                 emails: arr,
