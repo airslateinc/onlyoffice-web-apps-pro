@@ -1131,7 +1131,7 @@ define([
                     str = str.toLowerCase();
                     if (str.length>0) {
                         users = _.filter(users, function(item) {
-                            return (item.email && 0 === item.email.toLowerCase().indexOf(str) || item.name && 0 === item.name.toLowerCase().indexOf(str))
+                            return (item.email && item.email.toLowerCase().includes(str) || item.name && item.name.toLowerCase().includes(str))
                         });
                     }
                     var tpl = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
@@ -1200,6 +1200,6 @@ define([
         textResolve             : 'Resolve',
         textOpenAgain           : "Open Again",
         textFollowMove          : 'Follow Move',
-        textMention             : '@mention will provide access to the document and send an email'
+        textMention             : 'Comment or add with @'
     }, Common.Views.ReviewPopover || {}))
 });
