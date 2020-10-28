@@ -473,7 +473,8 @@ define([
                     this.emailMenu = new Common.UI.Menu({
                         maxHeight: 190,
                         cyclic: false,
-                        items: []
+                        items: [],
+                        cls: 'mentions-list'
                     }).on('render:after', function(mnu) {
                         this.scroller = new Common.UI.Scroller({
                             el: $(this.el).find('.dropdown-menu '),
