@@ -103,7 +103,8 @@ define([
             iconCls     : '',
             menu        : null,
             canFocused  : true,
-            className: ''
+            className   : '',
+            picture     : '',
         },
 
         tagName : 'li',
@@ -138,6 +139,7 @@ define([
             this.iconCls        = me.options.iconCls;
             this.hint           = me.options.hint;
             this.className      = me.options.className;
+            this.picture        = me.options.picture;
             this.rendered       = false;
 
             if (this.menu !== null && !(this.menu instanceof Common.UI.Menu)) {

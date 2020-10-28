@@ -1134,9 +1134,21 @@ define([
                             return (item.email && item.email.toLowerCase().includes(str) || item.name && item.name.toLowerCase().includes(str))
                         });
                     }
-                    var tpl = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
-                        loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
-                        divider = false;
+                    var tpl = _.template('\
+                        <div class="mentions-list__item-thumb" id="<%= id %>">\
+                            <div class="fl-thumb fl-thumb--circle fl-thumb--sm">\
+                                <img src="<%= Common.Utils.String.htmlEncode(options.picture) %>" class="fl-thumb__image">\
+                            </div>\
+                        </div>\
+                        <span class="mentions-list__item-username">\
+                            <%= Common.Utils.String.htmlEncode(caption) %>\
+                        </span>\
+                        <span class="mentions-list__item-email">\
+                            (<%= Common.Utils.String.htmlEncode(options.value) %>)\
+                        </span>');
+                    // <a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
+                    var loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
+                    divider = false;
                     _.each(users, function(menuItem, index) {
                         if (divider && !menuItem.hasAccess) {
                             divider = false;
@@ -1155,8 +1167,9 @@ define([
                             var mnu = new Common.UI.MenuItem({
                                 caption     : menuItem.name,
                                 value       : menuItem.email,
+                                picture     : menuItem.picture,
                                 template    : tpl,
-                                className   : 'Hello'
+                                className   : 'mentions-list__item'
                             }).on('click', function(item, e) {
                                 me.insertEmailToTextbox(item.options.value, left, right);
                             });
