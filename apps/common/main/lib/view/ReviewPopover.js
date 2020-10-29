@@ -1132,12 +1132,15 @@ define([
                                 <img src="<%= Common.Utils.String.htmlEncode(options.picture) %>" class="fl-thumb__image">\
                             </div>\
                         </div>\
-                        <span class="mentions-list__item-username">\
-                            <%= Common.Utils.String.htmlEncode(caption) %>\
-                        </span>\
-                        <span class="mentions-list__item-email">\
-                            (<%= Common.Utils.String.htmlEncode(options.value) %>)\
-                        </span>');
+                        <div class="mentions-list__item-info">\
+                            <span class="mentions-list__item-username">\
+                                <%= Common.Utils.String.htmlEncode(caption) %>\
+                            </span>\
+                            <span class="mentions-list__item-email">\
+                                (<%= Common.Utils.String.htmlEncode(options.value) %>)\
+                            </span>\
+                        </div>\
+                    ');
                     // <a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
                     var loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
                     divider = false;
