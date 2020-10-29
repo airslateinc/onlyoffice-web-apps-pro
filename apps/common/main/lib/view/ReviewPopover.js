@@ -393,9 +393,7 @@ define([
                                 readdresolves();
 
                             } else if (btn.hasClass('btn-inner-edit', false)) {
-                                console.log('Add or Edit clicked !');
                                 if (record.get('dummy')) {
-                                    console.log('Dummy');
                                     var commentVal = this.getActiveTextBoxVal();
                                     me.clearDummyText();
                                     if (commentVal.length > 0)
@@ -412,12 +410,10 @@ define([
 
                                 this.clearTextBoxBind();
                                 if (!_.isUndefined(this.replyId)) {
-                                    console.log('comment:changeReply');
                                     me.fireEvent('comment:changeReply', [commentId, this.replyId, this.getActiveTextBoxVal()]);
                                     this.replyId = undefined;
                                     me.fireEvent('comment:closeEditing');
                                 } else if (showEditBox) {
-                                    console.log('comment:change');
                                     me.fireEvent('comment:change', [commentId, this.getActiveTextBoxVal()]);
                                     me.fireEvent('comment:closeEditing');
                                     me.calculateSizeOfContent();
@@ -987,12 +983,10 @@ define([
                             right = i-1; break;
                         }
                     }
-                    console.log('Input value: ', val);
                     var str = val.substring(left, right+1),
                         res = str.match(/^(?:[@](?!1))(\S*)/);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
-                        console.log('show email menu: ', str);
                         me.onEmailListMenu(str, left, right);
                     }
                 });
@@ -1047,7 +1041,6 @@ define([
             } else {
                 this.clearUsers();
             }
-            console.log('toggleLoader: ', this._state.emailSearch);
             this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
         },
 
@@ -1083,7 +1076,6 @@ define([
             var me   = this,
                 users = me.externalUsers,
                 menu = me.emailMenu;
-            console.log('onEmailListMenu: ', users, 'str: ', str, 'type: ', typeof str);
             if (users.length<1) {
                 this._state.emailSearch = {
                     str: str,
@@ -1095,7 +1087,6 @@ define([
 
                 this.isUsersLoading = true;
                 Common.Gateway.requestUsers();
-                console.log('Before toggle loader: ', this._state.emailSearch);
                 this.toggleLoader(true);
                 return;
             }
