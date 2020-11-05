@@ -1029,7 +1029,13 @@ define([
         },
 
         setUsers: function(data) {
-            this.externalUsers = data.users || [];
+            var users;
+            if (data && data.users && data.users.length > 0) {
+                users = data.users;
+            } else {
+                users = [{ empty: true }]
+            }
+            this.externalUsers = users;
             this.isUsersLoading = false;
             this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
             this._state.emailSearch = null;
@@ -1153,7 +1159,15 @@ define([
                         if (menuItem.loader) {
                             var mnu = new Common.UI.MenuItem({
                                 value     : 'Loading...',
-                                template    : loader
+                                template  : loader
+                            });
+                            menu.addItem(mnu);
+                        }
+
+                        if (menuItem.empty) {
+                            var mnu = new Common.UI.MenuItem({
+                                value     : 'No contacts yet',
+                                template  : loader
                             });
                             menu.addItem(mnu);
                         }
