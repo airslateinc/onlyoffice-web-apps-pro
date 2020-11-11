@@ -914,7 +914,7 @@ define([
             if (isLastAtSign) {
                 return currentValue.substring(0, currentValue.length - 1);
             }
-            return recurrentValue;
+            return currentValue;
         },
         saveDummyText: function () {
             if (this.commentsView && this.commentsView.cmpEl.find('.lock-area').length < 1) {
