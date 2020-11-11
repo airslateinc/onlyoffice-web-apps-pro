@@ -908,9 +908,17 @@ define([
 
             return undefined;
         },
+        deleteLastAtSign: function (currentValue) {
+            var lastAtIndex = currentValue.lastIndexOf('@');
+            var isLastAtSign = lastAtIndex === currentValue.length - 1;
+            if (isLastAtSign) {
+                return currentValue.substring(0, currentValue.length - 1);
+            }
+            return recurrentValue;
+        },
         saveDummyText: function () {
             if (this.commentsView && this.commentsView.cmpEl.find('.lock-area').length < 1) {
-                this.textDummyVal = this.commentsView.getActiveTextBoxVal();
+                this.textDummyVal = this.deleteLastAtSign(this.commentsView.getActiveTextBoxVal());
             }
         },
         clearDummyText: function () {
@@ -985,9 +993,12 @@ define([
                     }
                     var str = val.substring(left, right+1),
                         res = str.match(/^(?:[@](?!1))(\S*)/);
+                        console.log('Result: ', res);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
                         me.onEmailListMenu(str, left, right);
+                    } else if (me.emailMenu.isVisible()) {
+                        me.emailMenu.hide();
                     }
                 });
             }
@@ -1197,7 +1208,8 @@ define([
                     menu.alignPosition('bl-tl', -5);
                     menu.scroller.update({alwaysVisibleY: true});
                 } else {
-                    menu.rendered && menu.cmpEl.css('display', 'none');
+                    console.log('No matches');
+                    menu.rendered && menu.hide();
                 }
             } else {
                 menu.rendered && menu.cmpEl.css('display', 'none');
