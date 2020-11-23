@@ -292,8 +292,8 @@ if (Common === undefined) {
                 _postMessage({event:'onMakeActionLink', data: config})
             },
 
-            requestUsers:  function () {
-                _postMessage({event:'onRequestUsers'})
+            requestUsers:  function (requestString) {
+                _postMessage({event:'onRequestUsers', data: requestString})
             },
 
             requestSendNotify:  function (emails) {

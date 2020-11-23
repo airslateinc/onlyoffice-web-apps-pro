@@ -102,7 +102,7 @@ define([
             this.reviewStore = options.reviewStore;
             this.canRequestUsers = options.canRequestUsers;
             this.canRequestSendNotify = options.canRequestSendNotify;
-            this.externalUsers = [];
+            this.requestUsers = _.debounce(this.onEmailListMenu, 500);
             this._state = {commentsVisible: false, reviewVisible: false};
 
             _options.tpl = _.template(this.template)(_options);
@@ -996,7 +996,9 @@ define([
                         console.log('Result: ', res);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
-                        me.onEmailListMenu(str, left, right);
+                        me.requestUsers(str);
+                        me.left = left;
+                        me.right = right;
                     } else if (me.emailMenu.isVisible()) {
                         me.emailMenu.hide();
                     }
@@ -1046,23 +1048,20 @@ define([
             } else {
                 users = [{ empty: true }]
             }
-            this.externalUsers = users;
             this.isUsersLoading = false;
-            this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
-            this._state.emailSearch = null;
+            this.renderContacts(users);
         },
 
         toggleLoader: function(value) {
             if (value) {
-                this.externalUsers = [{ loader: true }]
+                this.renderContacts([{ loader: true }]);
             } else {
                 this.clearUsers();
             }
-            this._state.emailSearch && this.onEmailListMenu(this._state.emailSearch.str, this._state.emailSearch.left, this._state.emailSearch.right);
         },
 
         clearUsers: function() {
-            this.externalUsers = [];
+            this.renderContacts([]);
         },
 
         getPopover: function(options) {
@@ -1089,29 +1088,23 @@ define([
             }
         },
 
-        onEmailListMenu: function(str, left, right, show) {
-            var me   = this,
-                users = me.externalUsers,
+        onEmailListMenu: function(str) {
+            console.log('onEmailListMenu: ', str);
+            Common.Gateway.requestUsers(str);
+            this.toggleLoader(true);
+        },
+
+        renderContacts: function(users) {
+            console.log('renderContacts: ', users);
+            var me = this,
                 menu = me.emailMenu;
-            if (users.length<1) {
-                this._state.emailSearch = {
-                    str: str,
-                    left: left,
-                    right: right
-                };
-
-                if (this.isUsersLoading) return;
-
-                this.isUsersLoading = true;
-                Common.Gateway.requestUsers();
-                this.toggleLoader(true);
-                return;
-            }
-            if (typeof str == 'string') {
+            
+            if (users.length > 0) {
                 var menuContainer = me.$window.find(Common.Utils.String.format('#menu-container-{0}', menu.id)),
                     textbox = this.commentsView.getTextBox(),
                     textboxDom = textbox ? textbox[0] : null,
                     showPoint = textboxDom ? [textboxDom.offsetLeft, textboxDom.offsetTop + textboxDom.clientHeight + 3] : [0, 0];
+                    console.log(textboxDom, showPoint);
 
                 if (!menu.rendered) {
                     // Prepare menu container
@@ -1136,69 +1129,61 @@ define([
                     i--;
                 }
 
-                if (users.length>0) {
-                    str = str.toLowerCase();
-                    if (str.length>0) {
-                        users = _.filter(users, function(item) {
-                            return (item.email && item.email.toLowerCase().includes(str) || item.name && item.name.toLowerCase().includes(str))
-                        });
-                    }
-                    var tpl = _.template('\
-                        <div class="mentions-list__item-thumb" id="<%= id %>">\
-                            <div class="fl-thumb fl-thumb--circle fl-thumb--sm">\
-                                <img src="<%= Common.Utils.String.htmlEncode(options.picture) %>" class="fl-thumb__image">\
-                            </div>\
+                var tpl = _.template('\
+                    <div class="mentions-list__item-thumb" id="<%= id %>">\
+                        <div class="fl-thumb fl-thumb--circle fl-thumb--sm">\
+                            <img src="<%= Common.Utils.String.htmlEncode(options.picture) %>" class="fl-thumb__image">\
                         </div>\
-                        <div class="mentions-list__item-info">\
-                            <span class="mentions-list__item-username">\
-                                <%= Common.Utils.String.htmlEncode(caption) %>\
-                            </span>\
-                            <span class="mentions-list__item-email">\
-                                (<%= Common.Utils.String.htmlEncode(options.value) %>)\
-                            </span>\
-                        </div>\
-                    ');
-                    // <a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div><%= Common.Utils.String.htmlEncode(caption) %></div><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
-                    var loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
+                    </div>\
+                    <div class="mentions-list__item-info">\
+                        <span class="mentions-list__item-username">\
+                            <%= Common.Utils.String.htmlEncode(caption) %>\
+                        </span>\
+                        <span class="mentions-list__item-email">\
+                            (<%= Common.Utils.String.htmlEncode(options.value) %>)\
+                        </span>\
+                    </div>\
+                ');
+                var loader = _.template('<a id="<%= id %>" tabindex="-1" type="menuitem" style="font-size: 12px;"><div style="color: #909090;"><%= Common.Utils.String.htmlEncode(options.value) %></div></a>'),
                     divider = false;
-                    _.each(users, function(menuItem, index) {
-                        if (divider && !menuItem.hasAccess) {
-                            divider = false;
-                            menu.addItem(new Common.UI.MenuItem({caption: '--'}));
-                        }
 
-                        if (menuItem.loader) {
-                            var mnu = new Common.UI.MenuItem({
-                                value     : 'Loading...',
-                                template  : loader
-                            });
-                            menu.addItem(mnu);
-                        }
+                _.each(users, function(menuItem) {
+                    if (divider && !menuItem.hasAccess) {
+                        divider = false;
+                        menu.addItem(new Common.UI.MenuItem({caption: '--'}));
+                    }
 
-                        if (menuItem.empty) {
-                            var mnu = new Common.UI.MenuItem({
-                                value     : 'No contacts yet',
-                                template  : loader
-                            });
-                            menu.addItem(mnu);
-                        }
+                    if (menuItem.loader) {
+                        var mnu = new Common.UI.MenuItem({
+                            value     : 'Loading...',
+                            template  : loader
+                        });
+                        menu.addItem(mnu);
+                    }
 
-                        if (menuItem.email && menuItem.name) {
-                            var mnu = new Common.UI.MenuItem({
-                                caption     : menuItem.name,
-                                value       : menuItem.email,
-                                picture     : menuItem.picture,
-                                template    : tpl,
-                                className   : 'mentions-list__item'
-                            }).on('click', function(item, e) {
-                                me.insertEmailToTextbox(item.options.value, left, right);
-                            });
-                            menu.addItem(mnu);
-                            if (menuItem.hasAccess)
-                                divider = true;
-                        }
-                    });
-                }
+                    if (menuItem.empty) {
+                        var mnu = new Common.UI.MenuItem({
+                            value     : 'No contacts yet',
+                            template  : loader
+                        });
+                        menu.addItem(mnu);
+                    }
+
+                    if (menuItem.email && menuItem.name) {
+                        var mnu = new Common.UI.MenuItem({
+                            caption     : menuItem.name,
+                            value       : menuItem.email,
+                            picture     : menuItem.picture,
+                            template    : tpl,
+                            className   : 'mentions-list__item'
+                        }).on('click', function(item, e) {
+                            me.insertEmailToTextbox(item.options.value, me.left, me.right);
+                        });
+                        menu.addItem(mnu);
+                        if (menuItem.hasAccess)
+                            divider = true;
+                    }
+                });
 
                 if (menu.items.length>0) {
                     menuContainer.css({left: showPoint[0], top : showPoint[1]});
@@ -1211,6 +1196,7 @@ define([
                     console.log('No matches');
                     menu.rendered && menu.hide();
                 }
+
             } else {
                 menu.rendered && menu.cmpEl.css('display', 'none');
             }
