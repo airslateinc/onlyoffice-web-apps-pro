@@ -1,7 +1,7 @@
 {
     "name": "common",
-    "version": "5.4.1",
-    "build": 121,
+    "version": "5.6.5",
+    "build": 122,
     "homepage": "http://www.onlyoffice.com",
     "private": true,
     "sdk": {
@@ -17,7 +17,7 @@
                         "src": [
                             "Images/*",
                             "Images/placeholders/*",
-							"Images/content_controls/*",
+                            "Images/content_controls/*",
                             "Native/*.js",
                             "libfont/js/fonts.*",
                             "libfont/wasm/fonts.*"
