@@ -66,6 +66,9 @@ module.exports = function(grunt) {
                 }, {
                     from: /\{\{HELP_URL\}\}/g,
                     to: _encode(process.env.HELP_URL) || 'https://helpcenter.onlyoffice.com'
+                }, {
+                    from: /\{\{CDN_URL\}\}/g,
+                    to: _encode(process.env.CDN_URL),
                 }];
 
     var helpreplacements = [
@@ -314,7 +317,15 @@ module.exports = function(grunt) {
                     src: ['<%= pkg.main.copy.help[0].dest %>/ru/**/*.htm*'],
                     overwrite: true,
                     replacements: []
-                }
+                },
+                htmlReplace: {
+                    src: ['../deploy/web-apps/apps/documenteditor/main/index.html'],
+                    overwrite: true,
+                    replacements: [{
+                        from: /\{\{CDN_URL\}\}/g,
+                        to: _encode(process.env.CDN_URL),
+                    }],
+                },
             },
 
             concat: {
@@ -485,7 +496,7 @@ module.exports = function(grunt) {
                         .concat(packageFile['mobile']['copy']['images-common'])
                 }
             },
-            
+
             replace: {
                 writeVersion: {
                     src: ['<%= pkg.mobile.js.requirejs.options.out %>'],
@@ -595,7 +606,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('deploy-app-main',               ['prebuild-icons-sprite', 'main-app-init', 'clean:prebuild', 'imagemin', 'less',
                                                             'requirejs', 'concat', 'copy', 'svgmin', 'inline:index-page', 'inline:old-loader-page', 'json-minify',
-                                                            'replace:writeVersion', 'replace:prepareHelp', 'clean:postbuild']);
+                                                            'replace:writeVersion', 'replace:prepareHelp', 'replace:htmlReplace', 'clean:postbuild']);
 
     grunt.registerTask('deploy-app-mobile',             ['mobile-app-init', 'clean:deploy', 'cssmin', 'copy:template-backup',
                                                             'htmlmin', 'requirejs', 'concat', 'copy:template-restore',
@@ -603,7 +614,7 @@ module.exports = function(grunt) {
                                                             'copy:images-app', 'json-minify',
                                                             'replace:writeVersion', 'replace:fixResourceUrl']);
 
-    grunt.registerTask('deploy-app-embed',              ['embed-app-init', 'clean:prebuild', 'uglify', 'less', 'copy', 
+    grunt.registerTask('deploy-app-embed',              ['embed-app-init', 'clean:prebuild', 'uglify', 'less', 'copy',
                                                             'clean:postbuild']);
 
     doRegisterInitializeAppTask('common',               'Common',               'common.json');
@@ -628,7 +639,7 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy-spreadsheeteditor-component',  ['init-build-spreadsheeteditor', 'deploy-app']);
     grunt.registerTask('deploy-presentationeditor-component', ['init-build-presentationeditor', 'deploy-app']);
     // This task is called from the Makefile, don't delete it.
-    grunt.registerTask('deploy-documents-component',          ['deploy-common-component']);   
+    grunt.registerTask('deploy-documents-component',          ['deploy-common-component']);
 
     grunt.registerTask('deploy-documenteditor',     ['deploy-common-component', 'deploy-documenteditor-component']);
     grunt.registerTask('deploy-spreadsheeteditor',  ['deploy-common-component', 'deploy-spreadsheeteditor-component']);

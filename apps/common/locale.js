@@ -93,7 +93,8 @@ Common.Locale = new(function() {
     var _requireLang = function () {
         var lang = (_getUrlParameterByName('lang') || 'en').split(/[\-_]/)[0];
         currentLang = lang;
-        fetch('locale/' + lang + '.json')
+        var isDocumenteditor = window.location.href.includes('documenteditor');
+        fetch('{{CDN_URL}}/web-apps/apps/' + (isDocumenteditor ? 'documenteditor' : 'spreadsheeteditor') + '/main/locale/' + lang + '.json')
             .then(function(response) {
                 if (!response.ok) {
                     currentLang = 'en';
@@ -140,7 +141,7 @@ Common.Locale = new(function() {
         get: _get,
         getCurrentLanguage: _getCurrentLanguage
     };
-    
+
 })();
 
 
