@@ -56,7 +56,7 @@
                 location: <location>,
                 canCoAuthoring: <can coauthoring documents>,
                 canBackToFolder: <can return to folder> - deprecated. use "customization.goback" parameter,
-                createUrl: 'create document url', 
+                createUrl: 'create document url',
                 sharingSettingsUrl: 'document sharing settings url',
                 fileChoiceUrl: 'source url', // for mail merge or image from storage
                 callbackUrl: <url for connection between sdk and portal>,
@@ -390,7 +390,7 @@
 
                 _config.document.token = _config.token;
             }
-            
+
             return true;
         };
 
@@ -775,11 +775,9 @@
             isSafari_mobile = !isIE && !isChrome && check(/safari/) && (navigator.maxTouchPoints>0);
 
         path += app + "/";
-        path += (config.type === "mobile" || isSafari_mobile)
-            ? "mobile"
-            : config.type === "embedded"
-                ? "embed"
-                : "main";
+        path += config.type === "embedded"
+          ? "embed"
+          : "main";
 
         var index = "/index.html";
         if (config.editorConfig) {
@@ -851,7 +849,7 @@
         iframe.setAttribute("allowfullscreen",""); // for IE11
         iframe.setAttribute("onmousewheel",""); // for Safari on Mac
         iframe.setAttribute("allow", "autoplay");
-        
+
 		if (config.type == "mobile")
 		{
 			iframe.style.position = "fixed";
