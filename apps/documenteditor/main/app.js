@@ -45,19 +45,55 @@ require.config({
     // scripts that do not call define() to register a module
     baseUrl: '../../',
     paths: {
-        jquery          : '../vendor/jquery/jquery',
-        underscore      : '../vendor/underscore/underscore',
-        backbone        : '../vendor/backbone/backbone',
-        bootstrap       : '../vendor/bootstrap/dist/js/bootstrap',
-        text            : '../vendor/requirejs-text/text',
+        jquery          : [
+            '{{CDN_URL}}/web-apps/vendor/jquery/jquery',
+            '../vendor/jquery/jquery',
+        ],
+        underscore      : [
+            '{{CDN_URL}}/web-apps/vendor/underscore/underscore',
+            '../vendor/underscore/underscore',
+        ],
+        backbone        : [
+            '{{CDN_URL}}/web-apps/vendor/backbone/backbone',
+            '../vendor/backbone/backbone',
+        ],
+        bootstrap       : [
+            '{{CDN_URL}}/web-apps/vendor/bootstrap/dist/js/bootstrap',
+            '../vendor/bootstrap/dist/js/bootstrap',
+        ],
+        text            : [
+            '{{CDN_URL}}/web-apps/vendor/requirejs-text/text',
+            '../vendor/requirejs-text/text',
+        ],
         perfectscrollbar: 'common/main/lib/mods/perfect-scrollbar',
-        jmousewheel     : '../vendor/perfect-scrollbar/src/jquery.mousewheel',
-        xregexp         : '../vendor/xregexp/xregexp-all-min',
-        sockjs          : '../vendor/sockjs/sockjs.min',
-        jszip           : '../vendor/jszip/jszip.min',
-        jsziputils      : '../vendor/jszip-utils/jszip-utils.min',
-        allfonts        : '../../sdkjs/common/AllFonts',
-        sdk             : '../../sdkjs/word/sdk-all-min',
+        jmousewheel     : [
+            '{{CDN_URL}}/web-apps/vendor/perfect-scrollbar/src/jquery.mousewheel',
+            '../vendor/perfect-scrollbar/src/jquery.mousewheel',
+        ],
+        xregexp         : [
+            '{{CDN_URL}}/web-apps/vendor/xregexp/xregexp-all-min',
+            '../vendor/xregexp/xregexp-all-min',
+        ],
+        sockjs          : [
+            '{{CDN_URL}}/web-apps/vendor/sockjs/sockjs.min',
+            '../vendor/sockjs/sockjs.min',
+        ],
+        jszip           : [
+            '{{CDN_URL}}/web-apps/vendor/jszip/jszip.min',
+            '../vendor/jszip/jszip.min',
+        ],
+        jsziputils      : [
+            '{{CDN_URL}}/web-apps/vendor/jszip-utils/jszip-utils.min',
+            '../vendor/jszip-utils/jszip-utils.min',
+        ],
+        allfonts        : [
+            '{{CDN_URL}}/sdkjs/common/AllFonts',
+            '../../sdkjs/common/AllFonts',
+        ],
+        sdk             : [
+            '{{CDN_URL}}/sdkjs/word/sdk-all-min',
+            '../../sdkjs/word/sdk-all-min',
+        ],
         api             : 'api/documents/api',
         core            : 'common/main/lib/core/application',
         notification    : 'common/main/lib/core/NotificationCenter',
