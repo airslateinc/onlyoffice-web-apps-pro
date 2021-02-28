@@ -654,7 +654,8 @@
             setSharingSettings  : _setSharingSettings,
             insertImage         : _insertImage,
             setMailMergeRecipients: _setMailMergeRecipients,
-            setRevisedFile      : _setRevisedFile
+            setRevisedFile      : _setRevisedFile,
+            openDocument: _openDocument
         }
     };
 

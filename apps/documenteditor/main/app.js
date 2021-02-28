@@ -174,11 +174,31 @@ require([
     'locale'
 ], function (Backbone, Bootstrap, Core) {
     Backbone.history.start();
-
+    var destroy = function destroy () {
+        Object.values(DE.controllers).forEach(ctrl => {
+// console.log('CTRL -------------', ctrl)
+            if (ctrl._viewsCache) {
+                Object.values(ctrl._viewsCache).forEach(view => {
+                    ctrl.unbindViewEvents(view);
+                    view.remove();
+                });
+            }
+        });
+        var div =  document.createElement('div');
+        div.id = 'viewport';
+        document.body.prepend(div);
+    };
+    window.destroy = destroy;
     /**
      * Application instance with DE namespace defined
      */
-    var app = new Backbone.Application({
+    const createApp = (config) => {
+        return new Backbone.Application(config);
+    };
+
+    window.createApp = createApp;
+
+    var app = createApp({
         nameSpace: 'DE',
         autoCreate: false,
         controllers : [
