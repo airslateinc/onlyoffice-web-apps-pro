@@ -996,7 +996,6 @@ define([
                     }
                     var str = val.substring(left, right+1),
                         res = str.match(/^(?:[@](?!1))(\S*)/);
-                        console.log('Result: ', res);
                     if (res && res.length>1) {
                         str = res[1]; // send to show email menu
                         me.requestUsers(str);
@@ -1094,13 +1093,11 @@ define([
         },
 
         onEmailListMenu: function(str) {
-            console.log('onEmailListMenu: ', str);
             Common.Gateway.requestUsers(str);
             this.toggleLoader(true);
         },
 
         renderContacts: function(users) {
-            console.log('renderContacts: ', users);
             var me = this,
                 menu = me.emailMenu;
 
@@ -1109,7 +1106,6 @@ define([
                     textbox = this.commentsView.getTextBox(),
                     textboxDom = textbox ? textbox[0] : null,
                     showPoint = textboxDom ? [textboxDom.offsetLeft, textboxDom.offsetTop + textboxDom.clientHeight + 3] : [0, 0];
-                    console.log(textboxDom, showPoint);
 
                 if (!menu.rendered) {
                     // Prepare menu container
@@ -1198,7 +1194,6 @@ define([
                     menu.alignPosition('bl-tl', -5);
                     menu.scroller.update({alwaysVisibleY: true});
                 } else {
-                    console.log('No matches');
                     menu.rendered && menu.hide();
                 }
 
